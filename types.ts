@@ -16,6 +16,7 @@ export interface OrderFormState {
   phone: string;
   wilaya: string;
   addressDetails: string;
+  deliveryType: 'HOME' | 'DESK';
 }
 
 export interface CartItem {

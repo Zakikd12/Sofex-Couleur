@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ProductSize, OrderFormState, COLOR_CONFIG, PRICING, WILAYAS, ColorVariant } from '../types';
-import { Check, Send, Loader2, ArrowRight, X, Minus, Plus, Phone, MapPin, User, ChevronDown } from 'lucide-react';
+import { Check, Send, Loader2, ArrowRight, X, Minus, Plus, Phone, MapPin, User, ChevronDown, Building2, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface OrderFormProps {
@@ -35,7 +35,14 @@ const calculateProductsTotal = (quantities: Record<string, { [key in ProductSize
 };
 
 export const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState<OrderFormState>({ name: '', phone: '', wilaya: '', addressDetails: '' });
+  const [formData, setFormData] = useState<OrderFormState>({ 
+    name: '', 
+    phone: '', 
+    wilaya: '', 
+    addressDetails: '',
+    deliveryType: 'HOME' 
+  });
+  
   const [quantities, setQuantities] = useState<Record<string, { [key in ProductSize]: number }>>(() => {
     const initial: any = {};
     Object.keys(COLOR_CONFIG).forEach(color => {
@@ -79,6 +86,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
 
   const sendToTelegram = async () => {
     const wilayaName = WILAYAS.find(w => w.code === formData.wilaya)?.name || formData.wilaya;
+    const deliveryMethod = formData.deliveryType === 'HOME' ? 'توصيل للمنزل 🏠' : 'استلام من المكتب 🏢';
     
     // Format the items list
     let itemsListText = "";
@@ -100,6 +108,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose }) => {
 <b>الهاتف:</b> ${formData.phone}
 <b>الولاية:</b> [${formData.wilaya}] ${wilayaName}
 <b>العنوان:</b> ${formData.addressDetails}
+<b>نوع التوصيل:</b> ${deliveryMethod}
 ➖➖➖➖➖➖➖➖
 🛒 <b>تفاصيل الطلبية:</b>
 ${itemsListText}
@@ -160,7 +169,7 @@ ${itemsListText}
       Object.keys(COLOR_CONFIG).forEach(c => reset[c] = { '1KG': 0, '2KG': 0 });
       return reset;
     });
-    setFormData({ name: '', phone: '', wilaya: '', addressDetails: '' });
+    setFormData({ name: '', phone: '', wilaya: '', addressDetails: '', deliveryType: 'HOME' });
   };
 
   // --- RENDER SUCCESS ---
@@ -373,6 +382,27 @@ ${itemsListText}
                                         {/* Address Section */}
                                         <div>
                                             <label className="text-xs font-bold text-slate-400 mb-1.5 block pr-1">العنوان والشحن</label>
+                                            
+                                            {/* Delivery Type Selector */}
+                                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({...formData, deliveryType: 'HOME'})}
+                                                    className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all ${formData.deliveryType === 'HOME' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'bg-[#0f172a] border-white/10 text-slate-400 hover:bg-white/5'}`}
+                                                >
+                                                    <Home size={20} />
+                                                    <span className="text-xs font-bold">توصيل للمنزل</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({...formData, deliveryType: 'DESK'})}
+                                                    className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all ${formData.deliveryType === 'DESK' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'bg-[#0f172a] border-white/10 text-slate-400 hover:bg-white/5'}`}
+                                                >
+                                                    <Building2 size={20} />
+                                                    <span className="text-xs font-bold">استلام من المكتب</span>
+                                                </button>
+                                            </div>
+
                                             <div className="flex gap-3">
                                                 {/* Wilaya Dropdown */}
                                                 <div className="relative w-1/3 min-w-[120px]">
@@ -399,7 +429,7 @@ ${itemsListText}
                                                         value={formData.addressDetails} 
                                                         onChange={e => setFormData({...formData, addressDetails: e.target.value})} 
                                                         className="w-full px-4 py-3 bg-[#0f172a] border border-white/10 rounded-xl focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all font-bold text-white placeholder:text-slate-600 placeholder:font-normal text-sm" 
-                                                        placeholder="البلدية / الحي / تفاصيل المنزل" 
+                                                        placeholder={formData.deliveryType === 'HOME' ? "البلدية / الحي / تفاصيل المنزل" : "يرجى كتابة اسم مكتب التوصيل (اختياري)"} 
                                                     />
                                                 </div>
                                             </div>
